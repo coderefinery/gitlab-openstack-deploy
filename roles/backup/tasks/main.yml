@@ -1,0 +1,25 @@
+---
+- name: format new image volumee
+  filesystem:
+   dev: "{{ backup_device }}"
+   fstype: xfs
+  when: image_device is defined
+  become: True
+
+- name: mount image device
+  mount:
+    name: /backup/
+    src: "{{ backup_device }}"
+    state: mounted
+    fstype: xfs
+  when: image_device is defined
+  become: True
+
+- name: set permissions on image volume mount
+  file:
+    name: /backup/
+    state: directory
+    owner: cloud-user
+    group: cloud-user
+  become: True
+

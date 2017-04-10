@@ -1,0 +1,24 @@
+---
+- hosts: localhost
+  roles:
+    - create-servers
+  # once we have passwords etc. in ansible vault this is the simplest way to
+  # pass them to the playbook.
+  #
+  # For now there is a shell script that sets same environment variables.
+  #
+  #environment:
+  # OS_USERNAME: "{{ openstack_user }}"
+  #    OS_PASSWORD: "{{ openstack_password }}"
+  #    OS_AUTH_URL: "{{ openstack_endpoint }}"
+  #    OS_TENANT_NAME: "{{ openstack_tenant_name }}"
+  #    OS_TENANT_ID: "{{ openstack_tenant_id }}"
+  connection: local
+
+- hosts: gitlab
+  roles:
+      - gitlab-docker
+
+- hosts: backup
+  roles:
+      - backup

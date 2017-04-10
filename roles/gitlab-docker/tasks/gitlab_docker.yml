@@ -1,0 +1,19 @@
+- name: create docker
+  docker_service:
+    project_name: gitlab
+    definition:
+      version: "2"
+      services:
+        web:
+          image: "gitlab/gitlab-ce:{{ gitlab_tag }}"
+          restart: always
+          hostname: "gitlab-test.coderefinery.org"
+          ports:
+            - "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:80:80"
+            - "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:443:443"
+            - "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:10022:22"
+          volumes:
+            - "/srv/gitlab/config:/etc/gitlab"
+            - "/srv/gitlab/logs:/var/log/gitlab"
+            - "/srv/gitlab/data:/var/opt/gitlab"
+  become: True

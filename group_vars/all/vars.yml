@@ -1,0 +1,29 @@
+---
+gitlab_tag: 8.15.0-ce.0
+
+gitlab_name: gitlab-test
+server_name: gitlab-test.coderefinery.org
+public_ip: 86.50.168.91
+server_fqdn: "{{ server_name }}"
+network_id: 6089354a-b088-460b-a08f-c747099d9eba
+
+image_name: "CentOS-7.0"
+
+server_flavor: io.70GB
+
+keypair_name: id_rsa_gitlab_server
+ansible_user: cloud-user
+
+backup_device: /dev/vdd
+
+
+# these are at times accessed by index so don't change order!
+extra_volumes:
+  - { name: "{{ gitlab_name }}-data", device: "/dev/vdc", size: 400, mountpoint: "/srv/gitlab/data"}
+  - { name: "{{ gitlab_name }}-configs", device: "/dev/vde", size: 1, mountpoint: "/srv/gitlab/logs" }
+  - { name: "{{ gitlab_name }}-logs", device: "/dev/vdd", size: 5, mountpoint: "/srv/gitlab/config" }
+
+gitlab_root_password: "{{ vaulted_gitlab_root_password }}"
+ssl_certificate_key: "{{ vaulted_ssl_certificate_key }}"
+
+

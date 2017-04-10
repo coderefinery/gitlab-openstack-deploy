@@ -12,7 +12,6 @@ installed.
   $ mkvirtualenv cr-gitlab-devops
   (cr-gitlab-devops)$ pip install -r requirements.txt
 
-
 On subsequent uses it suffices to activate the virtual environment
 
   $ workon cr-gitlab-devops
@@ -41,10 +40,13 @@ The playbook called provisioning.yml will provision the required hardware. In
 step 1 this consists of
 
 * docker host
-* volume (X Gb), mounted at /srv/docker/gitlab/gitlab at the host,
-  /home/git/data at the gitlab container
-* volume (X+n Gb) for backups, mounted at yyyy
 
+* ports:
+  one with public ip for the instance
+  another with a public ip for mainenance
+
+* security group for the host
+ * permit port 22 to the host
 In step two there will be 1-N of
 
 * gitlab-ci-multi-runner

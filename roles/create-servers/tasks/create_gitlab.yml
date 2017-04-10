@@ -1,0 +1,108 @@
+---
+
+- name: create admin security group
+  os_security_group:
+    name: "{{ gitlab_name }}-admin-sg"
+    description: "[ansible] automatically created security group for {{ gitlab_name  }}"
+  register: admin_security_group
+
+- name: security group for SSH from CSC
+  os_security_group_rule:
+    security_group: "{{ gitlab_name }}-admin-sg"
+    protocol: tcp
+    port_range_min: 22
+    port_range_max: 22
+    remote_ip_prefix: 193.166.85.0/24
+
+- name: security group for SSH from CSC
+  os_security_group_rule:
+    security_group: "{{ gitlab_name }}-admin-sg"
+    protocol: tcp
+    port_range_min: 22
+    port_range_max: 22
+    remote_ip_prefix: 193.166.2.0/24
+
+- name: security group for SSH from CSC
+  os_security_group_rule:
+    security_group: "{{ gitlab_name }}-admin-sg"
+    protocol: tcp
+    port_range_min: 22
+    port_range_max: 22
+    remote_ip_prefix: 193.166.1.0/24
+
+- name: create public security group
+  os_security_group:
+    name: "{{ gitlab_name }}-public-sg"
+    description: "[ansible] automatically created security group for {{ gitlab_name  }}"
+  register: public_security_group
+
+- name: security group for SSH from everywhere
+  os_security_group_rule:
+    security_group: "{{ gitlab_name }}-public-sg"
+    protocol: tcp
+    port_range_min: 10022
+    port_range_max: 10022
+    remote_ip_prefix: 0.0.0.0/0
+
+- name: security group for HTTP from everywhere
+  os_security_group_rule:
+    security_group: "{{ gitlab_name }}-public-sg"
+    protocol: tcp
+    port_range_min: 80
+    port_range_max: 80
+    remote_ip_prefix: 0.0.0.0/0
+
+- name: security group for HTTPS from everywhere
+  os_security_group_rule:
+    security_group: "{{ gitlab_name }}-public-sg"
+    protocol: tcp
+    port_range_min: 443
+    port_range_max: 443
+    remote_ip_prefix: 0.0.0.0/0
+
+- debug:
+    var: extra_volumes
+
+- debug:
+    var: "{{ item.size }}"
+  with_items: "{{ extra_volumes }}"
+- name: create volumes
+  os_volume:
+    size: "{{ item.size }}"
+    display_name: "{{ item.name }}"
+    display_description: "[ansible] volume for server {{ gitlab_name }}"
+  with_items: "{{ extra_volumes }}"
+
+- name: Create the actual gitlab server
+  os_server:
+    name: "{{ gitlab_name }}"
+    state: present
+    image: "{{ image_name }}"
+    key_name: "{{ keypair_name }}"
+    timeout: 200
+    flavor: "{{ server_flavor }}"
+    #auto_ip: yes
+    security_groups:
+      - "{{ gitlab_name }}-admin-sg"
+      - "{{ gitlab_name }}-public-sg"
+    floating_ips:
+      - "{{ public_ip }}"
+
+  register: gitlab_server
+
+- name: attach volumes
+  os_server_volume:
+    state: present
+    server: "{{ gitlab_name }}"
+    volume: "{{ item.name }}"
+    device: "{{ item.device }}"
+  with_items: "{{ extra_volumes }}"
+
+- name: add gitlab_server
+  add_host:
+    name: gitlab
+    groups: gitlab-docker, double_nic
+    ansible_ssh_host: "{{ gitlab_server.openstack.interface_ip }}"
+    ansible_ssh_port: 22
+    ansible_ssh_user: cloud-user
+

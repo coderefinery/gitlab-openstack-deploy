@@ -1,0 +1,98 @@
+---
+- name: install yum packages
+  yum:
+    state: installed
+    name:
+    - docker
+    - dstat
+    - lsof
+    - bash-completion
+    - time
+    - tmux
+    - git
+    - python-devel
+    - openssl-devel
+    - python-pip
+    - sysstat
+    - iptables-services
+  become: True
+
+- name: create docker group
+  group:
+    name: docker
+    state: present
+  become: True
+
+- name: add ansible user to docker group
+  user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: yes
+  become: True
+
+- name: start docker
+  service: name=docker state=started enabled=yes
+  become: True
+
+- name: upgrade pip so package installs aren't broken
+  pip:
+    name: pip
+    state: latest
+  become: True
+
+- name: install docker-py on remote machine
+  pip:
+    name: "{{ item.name }}"
+    version: "{{ item.version }}"
+  become: True
+  with_items:
+    - { name: "docker", version: "2.2.1"}
+    - { name: "docker-py", version: "1.10.5" }
+    - { name: "docker-compose", version: "1.9.0" }
+
+- include: mount_volumes.yml
+
+
+- name: create ssl dir
+  file:
+    path: /srv/gitlab/config/ssl/
+    state: directory
+    mode: 0644
+    setype: svirt_sandbox_file_t
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  become: True
+
+
+- name: upload public key
+  copy:
+    src: cert.pem
+    dest: /srv/gitlab/config/ssl/{{ server_fqdn }}.crt
+    mode: 0644
+    setype: svirt_sandbox_file_t
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  become: True
+
+- name: upload private key
+  copy:
+    content: "{{ ssl_certificate_key }}"
+    dest: /srv/gitlab/config/ssl/{{ server_fqdn }}.key
+    mode: 0600
+    setype: svirt_sandbox_file_t
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  become: True
+
+
+- name: upload gitlab.rb
+  template:
+    src: gitlab.rb.j2
+    dest: /srv/gitlab/config/gitlab.rb
+    mode: 0644
+    setype: svirt_sandbox_file_t
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+  become: True
+
+- include: gitlab_docker.yml

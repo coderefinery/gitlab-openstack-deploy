@@ -1,0 +1,35 @@
+- name: format volumes
+  filesystem:
+      dev: "{{ item.device }}"
+      fstype: xfs
+  become: True
+  with_items: "{{ extra_volumes }}"
+
+- name: make parent dir
+  file:
+    path: /srv/gitlab/
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    setype: svirt_sandbox_file_t
+    mode: 0644
+  become: True
+
+- name: mount devices
+  mount:
+    name: "{{ item.mountpoint }}"
+    src: "{{ item.device }}"
+    state: mounted
+    fstype: xfs
+  with_items: "{{ extra_volumes }}"
+  become: True
+
+- name: ensure files are of svirt_sandbox_file_t
+  file:
+    setype: svirt_sandbox_file_t
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    recurse: true
+    path: "{{ item.mountpoint }}"
+  with_items: "{{ extra_volumes }}"
+  become: True

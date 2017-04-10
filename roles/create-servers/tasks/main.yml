@@ -1,0 +1,39 @@
+---
+- name: add keypair
+  os_keypair:
+    name: "{{ keypair_name }}"
+    public_key:  "{{ lookup('file', 'id_rsa_gitlab_server.pub' ) }}"
+  register: keypair
+
+- include: create_gitlab.yml
+
+- debug:
+    var: gitlab_server
+
+- include: create_backup.yml
+
+- name: add ssh alias to local ssh config
+  blockinfile:
+    dest:  ~/.ssh/config
+    backup: yes
+    mode: 0700
+    create: yes
+    marker: "# {mark} ANSIBLE MANAGED BLOCK for cr-gitlab"
+    block: |
+      Host gitlab-server
+      HostName {{ gitlab_server.openstack.interface_ip }}
+
+- name: add ssh alias to local ssh config
+  blockinfile:
+    dest:  ~/.ssh/config
+    backup: yes
+    mode: 0700
+    create: yes
+    marker: "# {mark} ANSIBLE MANAGED BLOCK for cr-gitlab-backup"
+    block: |
+      Host gitlab-backup
+      HostName {{ backup_server.openstack.interface_ip }}
+
+
+
+
