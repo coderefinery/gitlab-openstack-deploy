@@ -1,5 +1,5 @@
 ---
-gitlab_tag: 8.15.0-ce.0
+gitlab_tag: 8.16.0-ce.0
 
 gitlab_name: gitlab-test
 server_name: gitlab-test.coderefinery.org
@@ -22,6 +22,7 @@ extra_volumes:
   - { name: "{{ gitlab_name }}-data", device: "/dev/vdc", size: 400, mountpoint: "/srv/gitlab/data"}
   - { name: "{{ gitlab_name }}-configs", device: "/dev/vde", size: 1, mountpoint: "/srv/gitlab/logs" }
   - { name: "{{ gitlab_name }}-logs", device: "/dev/vdd", size: 5, mountpoint: "/srv/gitlab/config" }
+  - { name: "{{ gitlab_name }}-secret", device: "/dev/vdf", size: 5, mountpoint: "/srv/gitlab/config/backups" }
 
 gitlab_root_password: "{{ vaulted_gitlab_root_password }}"
 ssl_certificate_key: "{{ vaulted_ssl_certificate_key }}"

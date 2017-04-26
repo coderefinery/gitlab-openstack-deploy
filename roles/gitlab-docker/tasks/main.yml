@@ -59,8 +59,8 @@
     state: directory
     mode: 0644
     setype: svirt_sandbox_file_t
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    #    owner: "{{ ansible_user }}"
+    #group: "{{ ansible_user }}"
   become: True
 
 
@@ -70,8 +70,8 @@
     dest: /srv/gitlab/config/ssl/{{ server_fqdn }}.crt
     mode: 0644
     setype: svirt_sandbox_file_t
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    #    owner: "{{ ansible_user }}"
+    #group: "{{ ansible_user }}"
   become: True
 
 - name: upload private key
@@ -80,8 +80,8 @@
     dest: /srv/gitlab/config/ssl/{{ server_fqdn }}.key
     mode: 0600
     setype: svirt_sandbox_file_t
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    #owner: "{{ ansible_user }}"
+    #group: "{{ ansible_user }}"
   become: True
 
 
@@ -91,8 +91,9 @@
     dest: /srv/gitlab/config/gitlab.rb
     mode: 0644
     setype: svirt_sandbox_file_t
-    owner: "{{ ansible_user }}"
-    group: "{{ ansible_user }}"
+    #owner: "{{ ansible_user }}"
+    #group: "{{ ansible_user }}"
   become: True
 
 - include: gitlab_docker.yml
+- include: setup_backup.yml

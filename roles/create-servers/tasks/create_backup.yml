@@ -12,7 +12,6 @@
     protocol: tcp
     port_range_min: 22
     port_range_max: 22
-    security_group: "{{ gitlab_name }}-admin-sg"
 
 - name: create an extra volume for backups
   os_volume:
