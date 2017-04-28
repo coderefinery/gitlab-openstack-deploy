@@ -42,7 +42,7 @@
 
 - name: add backup_server
   add_host:
-    name: gitlab-backup
+    name: gitlab_backup
     groups: backup
     ansible_ssh_host: "{{ backup_server.openstack.interface_ip }}"
     ansible_ssh_port: 22

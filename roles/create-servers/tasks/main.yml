@@ -22,6 +22,7 @@
     block: |
       Host gitlab-server
       HostName {{ gitlab_server.openstack.interface_ip }}
+      User cloud-user
 
 - name: add ssh alias to local ssh config
   blockinfile:
@@ -33,7 +34,5 @@
     block: |
       Host gitlab-backup
       HostName {{ backup_server.openstack.interface_ip }}
-
-
-
+      User cloud-user
 

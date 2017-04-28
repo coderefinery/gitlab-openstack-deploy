@@ -2,10 +2,12 @@
   cron:
     name: create a backup of secrets/configs
     special_time: daily
-    job: docker exec -t gitlab /bin/sh -c 'umask 0077; tar cfz /secret/gitlab/backups/$(date "+etc-gitlab-\%s.tgz") -C / etc/gitlab'
+    job: docker exec -t gitlab /bin/sh -c 'umask 0077; tar cfz /secret/gitlab/backups/$(date "+etc-gitlab-\%s.tgz") -C / etc/gitlab --exclude=etc/gitlab/backups'
 
 - name: add user data backup to cron
   cron:
     name: create a user data backup
     special_time: daily
     job: docker exec -t gitlab gitlab-rake gitlab:backup:create
+
+

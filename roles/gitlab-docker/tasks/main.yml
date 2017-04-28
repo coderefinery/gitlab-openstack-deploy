@@ -30,6 +30,16 @@
     append: yes
   become: True
 
+- name: install docker-py on remote machine
+  pip:
+    name: "{{ item.name }}"
+    version: "{{ item.version }}"
+  become: True
+  with_items:
+    - { name: "docker", version: "2.2.1"}
+    - { name: "docker-py", version: "1.10.5" }
+    - { name: "docker-compose", version: "1.9.0" }
+
 - name: start docker
   service: name=docker state=started enabled=yes
   become: True
@@ -40,15 +50,6 @@
     state: latest
   become: True
 
-- name: install docker-py on remote machine
-  pip:
-    name: "{{ item.name }}"
-    version: "{{ item.version }}"
-  become: True
-  with_items:
-    - { name: "docker", version: "2.2.1"}
-    - { name: "docker-py", version: "1.10.5" }
-    - { name: "docker-compose", version: "1.9.0" }
 
 - include: mount_volumes.yml
 
@@ -64,7 +65,7 @@
   become: True
 
 
-- name: upload public key
+- name: upload public SSL key
   copy:
     src: cert.pem
     dest: /srv/gitlab/config/ssl/{{ server_fqdn }}.crt
@@ -74,7 +75,7 @@
     #group: "{{ ansible_user }}"
   become: True
 
-- name: upload private key
+- name: upload private SSL key
   copy:
     content: "{{ ssl_certificate_key }}"
     dest: /srv/gitlab/config/ssl/{{ server_fqdn }}.key
@@ -97,3 +98,15 @@
 
 - include: gitlab_docker.yml
 - include: setup_backup.yml
+
+- name: Set authorizy from file for backups
+  authorized_key:
+    user: root
+    state: present
+    key: "{{ lookup('file', 'id_rsa_gitlab_backup.pub') }}"
+  become: True
+
+
+
+
+

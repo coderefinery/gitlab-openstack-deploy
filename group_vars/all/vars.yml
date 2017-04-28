@@ -1,5 +1,5 @@
 ---
-gitlab_tag: 8.16.0-ce.0
+gitlab_tag: 8.17.5-ce.0
 
 gitlab_name: gitlab-test
 server_name: gitlab-test.coderefinery.org
@@ -14,7 +14,8 @@ server_flavor: io.70GB
 keypair_name: id_rsa_gitlab_server
 ansible_user: cloud-user
 
-backup_device: /dev/vdd
+# it just "is" vdc in CentOS, this is more descriptive than declarative
+backup_device: /dev/vdc
 
 
 # these are at times accessed by index so don't change order!
@@ -26,5 +27,6 @@ extra_volumes:
 
 gitlab_root_password: "{{ vaulted_gitlab_root_password }}"
 ssl_certificate_key: "{{ vaulted_ssl_certificate_key }}"
+id_rsa_gitlab_backup: "{{ vaulted_id_rsa_gitlab_backup }}"
 
 

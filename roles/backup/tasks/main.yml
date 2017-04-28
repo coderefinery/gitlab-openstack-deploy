@@ -3,7 +3,7 @@
   filesystem:
    dev: "{{ backup_device }}"
    fstype: xfs
-  when: image_device is defined
+  when: backup_device is defined
   become: True
 
 - name: mount image device
@@ -12,7 +12,7 @@
     src: "{{ backup_device }}"
     state: mounted
     fstype: xfs
-  when: image_device is defined
+  when: backup_device is defined
   become: True
 
 - name: set permissions on image volume mount
@@ -22,4 +22,53 @@
     owner: cloud-user
     group: cloud-user
   become: True
+
+- name: create data dir
+  file:
+    name: /backup/data/
+    state: directory
+    owner: cloud-user
+    group: cloud-user
+  become: True
+
+
+- name: create data dir
+  file:
+    name: /backup/secret/
+    state: directory
+    owner: cloud-user
+    group: cloud-user
+    mode: 0700
+  become: True
+
+
+- name: set up private key
+  copy:
+    dest: /home/cloud-user/.ssh/id_rsa
+    content: "{{ id_rsa_gitlab_backup }}"
+    mode: 0700
+    owner: cloud-user
+    group: cloud-user
+  become: True
+
+- name: set up cron job for data backup
+  cron:
+    name: "job for data backup"
+    #daily on host seems to run at midnight, this is well past that
+    hour: "3"
+    minute: "10"
+    job: rsync -atz root@{{ hostvars['gitlab']['ansible_default_ipv4']['address'] }}:/srv/gitlab/data/backups/ /backup/data/
+    user: cloud-user
+  become: True
+
+- name: set up cron job
+  cron:
+    name: "job for sensitive backup"
+    hour: "3"
+    minute: "5"
+    job: rsync -atz root@{{ hostvars['gitlab']['ansible_default_ipv4']['address'] }}:/secret/gitlab/backups/ /backup/secret/
+    user: cloud-user
+  become: True
+
+
 
