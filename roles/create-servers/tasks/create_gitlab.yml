@@ -83,7 +83,7 @@
     flavor: "{{ server_flavor }}"
     #auto_ip: yes
     security_groups:
-      - "{{ gitlab_name }}-admin-sg"
+      - "{{ gitlab_name }}-ssh-from-csc"
       - "{{ gitlab_name }}-public-sg"
     floating_ips:
       - "{{ public_ip }}"
@@ -101,7 +101,7 @@
 - name: add gitlab_server
   add_host:
     name: gitlab
-    groups: gitlab-docker, double_nic
+    groups: gitlab-docker
     ansible_ssh_host: "{{ gitlab_server.openstack.interface_ip }}"
     ansible_ssh_port: 22
     ansible_ssh_user: cloud-user

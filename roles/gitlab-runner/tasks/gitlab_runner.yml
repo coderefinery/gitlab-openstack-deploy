@@ -1,0 +1,26 @@
+#always use latest gitlab-runner as it may have security patches
+
+- name: pull the image
+  docker_image:
+    name: "gitlab/gitlab-runner:latest"
+
+- name: start the container
+  docker_container:
+    name: gitlab-runner
+    image:  "gitlab/gitlab-runner:latest"
+    state: started
+    restart_policy: always
+    volumes:
+      - "/srv/gitlab-runner/config:/etc/gitlab-runner:Z"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+- name: register runner
+  shell: >
+        docker exec gitlab-runner gitlab-ci-multi-runner register
+        --non-interactive --url https://{{ server_fqdn }}/ci
+        -r {{ runner_registration_token }} --executor docker
+        --docker-image="ubuntu"
+        --description "ubuntu"
+        --docker-extra-hosts "{{server_fqdn}}:{{public_ip}}"
+
+

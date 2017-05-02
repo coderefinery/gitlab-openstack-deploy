@@ -65,8 +65,6 @@ On docker host
   * ensure postgres and redis are started
   * pull and start {{ new_version }} gitlab container
 
-Upgrading:
-
 edit new_version to be 1 above old_version, run again.
 
 

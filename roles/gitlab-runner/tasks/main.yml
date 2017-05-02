@@ -1,0 +1,89 @@
+---
+- name: install yum packages
+  yum:
+    state: installed
+    name:
+    - docker
+    - dstat
+    - lsof
+    - bash-completion
+    - time
+    - tmux
+    - git
+    - python-devel
+    - openssl-devel
+    - python-pip
+    - sysstat
+    - iptables-services
+  become: True
+
+- name: create docker group
+  group:
+    name: docker
+    state: present
+  become: True
+
+- name: add ansible user to docker group
+  user:
+    name: "{{ ansible_user }}"
+    groups: docker
+    append: yes
+  become: True
+
+- name: install docker-py on remote machine
+  pip:
+    name: "{{ item.name }}"
+    version: "{{ item.version }}"
+  become: True
+  with_items:
+    - { name: "docker", version: "2.2.1"}
+    - { name: "docker-py", version: "1.10.5" }
+    - { name: "docker-compose", version: "1.9.0" }
+
+- name: start docker
+  service: name=docker state=started enabled=yes
+  become: True
+
+- name: upgrade pip so package installs aren't broken
+  pip:
+    name: pip
+    state: latest
+  become: True
+
+- name: make parent dir
+  file:
+    path: /srv/gitlab-runner/config/
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    setype: svirt_sandbox_file_t
+    mode: 0744
+  become: True
+
+- name: make cert dir
+  file:
+    path: /srv/gitlab-runner/config/certs/
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    setype: svirt_sandbox_file_t
+    mode: 0744
+  become: True
+
+
+- name: upload self-signed cert
+  copy:
+    dest: /srv/gitlab-runner/config/certs/ca.crt
+    src: cert.pem
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    setype: svirt_sandbox_file_t
+    mode: 0744
+  become: True
+
+- name: disable selinux to permit using hosts docker for builds
+  selinux:
+    state: disabled
+  become: True
+
+- include: gitlab_runner.yml

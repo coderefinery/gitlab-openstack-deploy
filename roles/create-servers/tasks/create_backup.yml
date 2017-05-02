@@ -6,12 +6,6 @@
     description: "[ansible] automatically created security group for {{ gitlab_name  }} backup"
   register: admin_security_group
 
-- name: security group for SSH from Gitlab instance
-  os_security_group_rule:
-    security_group: "{{ gitlab_name }}-backup-sg"
-    protocol: tcp
-    port_range_min: 22
-    port_range_max: 22
 
 - name: create an extra volume for backups
   os_volume:
@@ -31,6 +25,7 @@
     auto_ip: yes
     security_groups:
       - "{{ gitlab_name }}-admin-sg"
+      - "{{ gitlab_name }}-ssh-from-csc"
   register: backup_server
 
 - name: attach backup volume

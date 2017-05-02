@@ -1,0 +1,21 @@
+---
+- name: Create the gitlab runner
+  os_server:
+    name: "{{ gitlab_name }}-runner"
+    state: present
+    image: "{{ image_name }}"
+    key_name: "{{ keypair_name }}"
+    timeout: 200
+    flavor: "{{ runner_flavor }}"
+    security_groups:
+      - "{{ gitlab_name }}-ssh-from-csc"
+  register: gitlab_runner
+
+- name: add gitlab_runner to inventory
+  add_host:
+    name: gitlab_runner
+    groups: gitlab-runner
+    ansible_ssh_host: "{{ gitlab_runner.openstack.interface_ip }}"
+    ansible_ssh_port: 22
+    ansible_ssh_user: cloud-user
+

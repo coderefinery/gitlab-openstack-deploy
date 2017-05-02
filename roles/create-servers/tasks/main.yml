@@ -5,12 +5,14 @@
     public_key:  "{{ lookup('file', 'id_rsa_gitlab_server.pub' ) }}"
   register: keypair
 
+- include: create_sg.yml
+
 - include: create_gitlab.yml
 
-- debug:
-    var: gitlab_server
 
 - include: create_backup.yml
+
+- include: create_runner.yml
 
 - name: add ssh alias to local ssh config
   blockinfile:

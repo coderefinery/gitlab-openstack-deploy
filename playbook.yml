@@ -22,3 +22,6 @@
 - hosts: backup
   roles:
       - backup
+- hosts: gitlab_runner
+  roles:
+      - gitlab-runner
