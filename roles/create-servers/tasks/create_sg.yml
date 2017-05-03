@@ -27,3 +27,17 @@
     port_range_min: 22
     port_range_max: 22
     remote_ip_prefix: 193.166.1.0/24
+
+- name: create ssh from intranet group
+  os_security_group:
+    name: "{{ gitlab_name }}-ssh-from-local"
+    description: "[ansible] automatically created security group for {{ gitlab_name  }}"
+  register: admin_security_group
+
+- name: security group for SSH from CSC
+  os_security_group_rule:
+    security_group: "{{ gitlab_name }}-ssh-from-local"
+    protocol: tcp
+    port_range_min: 22
+    port_range_max: 22
+    remote_ip_prefix: "{{ private_network_cidr }}"

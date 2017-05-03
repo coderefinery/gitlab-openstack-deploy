@@ -6,7 +6,6 @@
     description: "[ansible] automatically created security group for {{ gitlab_name  }} backup"
   register: admin_security_group
 
-
 - name: create an extra volume for backups
   os_volume:
     size: 200 # gb
@@ -22,10 +21,9 @@
     key_name: "{{ keypair_name }}"
     timeout: 200
     flavor: "{{ server_flavor }}"
-    auto_ip: yes
+    auto_ip: no
     security_groups:
-      - "{{ gitlab_name }}-admin-sg"
-      - "{{ gitlab_name }}-ssh-from-csc"
+      - "{{ gitlab_name }}-ssh-from-local"
   register: backup_server
 
 - name: attach backup volume
@@ -35,11 +33,10 @@
     volume:  "{{ gitlab_name }}-backups"
     device: "{{ backup_device }}"
 
-- name: add backup_server
+- name: add backup_server to inventory
   add_host:
-    name: gitlab_backup
+    name: gitlab-backup
     groups: backup
-    ansible_ssh_host: "{{ backup_server.openstack.interface_ip }}"
     ansible_ssh_port: 22
     ansible_ssh_user: cloud-user
 

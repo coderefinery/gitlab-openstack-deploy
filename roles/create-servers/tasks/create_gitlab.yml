@@ -60,12 +60,6 @@
     port_range_max: 443
     remote_ip_prefix: 0.0.0.0/0
 
-- debug:
-    var: extra_volumes
-
-- debug:
-    var: "{{ item.size }}"
-  with_items: "{{ extra_volumes }}"
 - name: create volumes
   os_volume:
     size: "{{ item.size }}"

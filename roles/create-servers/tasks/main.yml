@@ -14,27 +14,56 @@
 
 - include: create_runner.yml
 
-- name: add ssh alias to local ssh config
+- name: add ssh alias for forwarding to local config
   blockinfile:
-    dest:  ~/.ssh/config
+    dest:  ssh.cfg
     backup: yes
     mode: 0700
     create: yes
     marker: "# {mark} ANSIBLE MANAGED BLOCK for cr-gitlab"
     block: |
-      Host gitlab-server
+      Host {{ server_fqdn }}
+      HostName {{ gitlab_server.openstack.interface_ip }}
+      User cloud-user
+      ControlMaster auto
+      ControlPath ~/.ssh/ansible-%r@%h:%p
+      ControlPersist 5m
+
+- name: add gitlab
+  blockinfile:
+    dest:  ssh.cfg
+    backup: yes
+    mode: 0700
+    create: yes
+    marker: "# {mark} ANSIBLE MANAGED BLOCK for cr-gitlab-proper"
+    block: |
+      Host gitlab
       HostName {{ gitlab_server.openstack.interface_ip }}
       User cloud-user
 
 - name: add ssh alias to local ssh config
   blockinfile:
-    dest:  ~/.ssh/config
+    dest:  ssh.cfg
     backup: yes
     mode: 0700
     create: yes
     marker: "# {mark} ANSIBLE MANAGED BLOCK for cr-gitlab-backup"
     block: |
       Host gitlab-backup
-      HostName {{ backup_server.openstack.interface_ip }}
-      User cloud-user
+      HostName {{ backup_server.openstack.private_v4 }}
+      User {{ ansible_user }}
+      ProxyCommand ssh -W %h:%p {{ ansible_user }}@{{ server_fqdn }}
+
+- name: add ssh alias to local ssh config
+  blockinfile:
+    dest:  ssh.cfg
+    backup: yes
+    mode: 0700
+    create: yes
+    marker: "# {mark} ANSIBLE MANAGED BLOCK for cr-gitlab-runner"
+    block: |
+      Host gitlab-runner
+      HostName {{ gitlab_runner.openstack.private_v4 }}
+      User {{ ansible_user }}
+      ProxyCommand ssh -W %h:%p {{ ansible_user }}@{{ server_fqdn }}
 

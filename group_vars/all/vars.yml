@@ -4,6 +4,8 @@ gitlab_tag: latest
 gitlab_name: gitlab-test
 server_name: gitlab-test.coderefinery.org
 public_ip: 86.50.168.91
+private_network: 192.168.44.*
+private_network_cidr: 192.168.44.0/24
 server_fqdn: "{{ server_name }}"
 network_id: 6089354a-b088-460b-a08f-c747099d9eba
 

@@ -7,15 +7,14 @@
     key_name: "{{ keypair_name }}"
     timeout: 200
     flavor: "{{ runner_flavor }}"
+    auto_ip: false
     security_groups:
-      - "{{ gitlab_name }}-ssh-from-csc"
+      - "{{ gitlab_name }}-ssh-from-local"
   register: gitlab_runner
 
 - name: add gitlab_runner to inventory
   add_host:
-    name: gitlab_runner
+    name: gitlab-runner
     groups: gitlab-runner
-    ansible_ssh_host: "{{ gitlab_runner.openstack.interface_ip }}"
     ansible_ssh_port: 22
     ansible_ssh_user: cloud-user
-

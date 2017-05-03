@@ -1,8 +1,8 @@
 # CodeRefinery Gitlab Devops
 
 This repository contains Ansible playbooks for administering the CodeRefinery
-gitlab installation. It should not be kept on the gitlab installation to avoid obvious chicken-egg problems.
-
+gitlab installation. It should not be kept on the gitlab installation to avoid
+obvious chicken-egg problems.
 
 ### Setting up the environment
 
@@ -16,6 +16,7 @@ On subsequent uses it suffices to activate the virtual environment
 
   $ workon cr-gitlab-devops
   (cr-gitlab-devops)$
+
 
 ## Playbook
 
@@ -34,37 +35,60 @@ established for secrets.
   (cr-gitlab-devops)$
 
 
-### Provisioning
+Then you can run the actual playbook provided you have the vault password.
 
-The playbook called provisioning.yml will provision the required hardware. In
-step 1 this consists of
+  (cr-gitlab-devops)$ ansible-playbook playbook.yml
+  Vault password:
 
-* docker host
+#### Ansible vault
 
-* ports:
-  one with public ip for the instance
-  another with a public ip for mainenance
+To de-crypt the encrypted secrets found in group\_vars/all/vault.yml
+one needs a vault password. It is distributed separately.
 
-* security group for the host
- * permit port 22 to the host
-In step two there will be 1-N of
+To view the contents of the vault file run
 
-* gitlab-ci-multi-runner
-  * unsure if in a separate VM, container or what
+  (cr-gitlab-devops)$ ansible-vault view group\_vars/all/vault.yml
 
+And to edit it run
 
-### Configuring/installing
+  (cr-gitlab-devops)$ ansible-vault edit group\_vars/all/vault.yml
 
-On docker host
- * install docker, other possible prerequisites
- * mount extra volume at /srv/docker/gitlab/gitlab
-    * chcon the directory for container access
- * pull {{ new_version }} image(s) for docker, postgres and redis
- * if {{ old_versin != new_version }} stop and remove {{ old_version }} image
-  * optional backup here if needed
-  * ensure postgres and redis are started
-  * pull and start {{ new_version }} gitlab container
+For more information check out  [Ansible vault
+documentation](http://docs.ansible.com/ansible/playbooks_vault.html)
 
-edit new_version to be 1 above old_version, run again.
+## Provisioning
 
+Step one of the playbook creates the following servers
 
+* the actual gitlab host with a public ip
+* a separate backup-host with a volume for backups and a cron-job that runs
+  backups on gitlab-host
+* a gitlab-runner instance that runs gitlab-runner inside docker against the gitlab instance
+
+  * there was a chicken and egg issue with getting the authentication key for
+    runner so after installing gitlab you will need to get the files
+
+After the hosts are created the system creates ssh.cfg in the root of your
+installation, which is used to use the gitlab installation as bastion so that
+the gitlab installation can be the only one of the three items with a public
+IP address.
+
+To communicate with the other two parts run
+
+    $ ssh -F ssh.cfg gitlab-runner / gitlab-backup
+
+### Configuring
+
+Most configuration is in group\_vars/all/vars.yml or the vault.yml that was
+already covered. Moving per-role variables to the corresponding role is a TODO
+item.
+
+Most values should be self-explanatory. If in doubt try grepping for how they
+are used.
+
+When adding a variable to the vault make a line in vars.yml that copies the
+variable to another variable without the prefix vaulted\_ . This makes it
+easier to check the names of variables in the vault without decrypting it all the time..
+
+Initial installation root password is stored inside the vault. Check that to
+log in and start managing the server if installing from scratch.
