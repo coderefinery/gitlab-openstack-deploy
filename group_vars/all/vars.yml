@@ -1,5 +1,5 @@
 ---
-gitlab_tag: 8.17.5-ce.0
+gitlab_tag: latest
 
 gitlab_name: gitlab-test
 server_name: gitlab-test.coderefinery.org
