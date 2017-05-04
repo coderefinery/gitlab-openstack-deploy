@@ -41,3 +41,30 @@
     port_range_min: 22
     port_range_max: 22
     remote_ip_prefix: "{{ private_network_cidr }}"
+
+- name: create common security group for internal permissions
+  os_security_group:
+    name: "{{ gitlab_name }}-common-group"
+    description: "[ansible] automatically created security group for {{ gitlab_name  }}"
+  register: common_security_group
+
+- name: security group for things internal to parts of the deployment
+  os_security_group_rule:
+    security_group: "{{ gitlab_name }}-common-group"
+    protocol: tcp
+    port_range_min: 0
+    port_range_max: 10000
+    remote_group: "{{ common_security_group.secgroup.id }}"
+
+- name: security group for things internal to parts of the deployment
+  os_security_group_rule:
+    security_group: "{{ gitlab_name }}-common-group"
+    protocol: udp
+    port_range_min: 0
+    port_range_max: 10000
+    remote_group: "{{ common_security_group.secgroup.id }}"
+
+
+
+
+

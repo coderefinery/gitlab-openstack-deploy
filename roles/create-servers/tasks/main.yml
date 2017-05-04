@@ -13,6 +13,7 @@
 - include: create_backup.yml
 
 - include: create_runner.yml
+  when: runner_registration_token|default("") != ""
 
 - name: add ssh alias for forwarding to local config
   blockinfile:
@@ -24,7 +25,7 @@
     block: |
       Host {{ server_fqdn }}
       HostName {{ gitlab_server.openstack.interface_ip }}
-      User cloud-user
+      User {{ ansible_user }}
       ControlMaster auto
       ControlPath ~/.ssh/ansible-%r@%h:%p
       ControlPersist 5m
@@ -39,7 +40,7 @@
     block: |
       Host gitlab
       HostName {{ gitlab_server.openstack.interface_ip }}
-      User cloud-user
+      User {{ ansible_user }}
 
 - name: add ssh alias to local ssh config
   blockinfile:
@@ -66,4 +67,4 @@
       HostName {{ gitlab_runner.openstack.private_v4 }}
       User {{ ansible_user }}
       ProxyCommand ssh -W %h:%p {{ ansible_user }}@{{ server_fqdn }}
-
+  when: runner_registration_token|default("") != ""

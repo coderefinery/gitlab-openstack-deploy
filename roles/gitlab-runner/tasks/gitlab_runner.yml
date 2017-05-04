@@ -3,6 +3,7 @@
 - name: pull the image
   docker_image:
     name: "gitlab/gitlab-runner:latest"
+  become: True
 
 - name: start the container
   docker_container:
@@ -13,6 +14,12 @@
     volumes:
       - "/srv/gitlab-runner/config:/etc/gitlab-runner:Z"
       - "/var/run/docker.sock:/var/run/docker.sock"
+    etc_hosts: >
+      {
+        "{{ server_fqdn }}": "{{hostvars['gitlab']['private_v4']}}"
+      }
+
+  become: True
 
 - name: register runner
   shell: >
@@ -21,6 +28,5 @@
         -r {{ runner_registration_token }} --executor docker
         --docker-image="ubuntu"
         --description "ubuntu"
-        --docker-extra-hosts "{{server_fqdn}}:{{public_ip}}"
-
-
+        --docker-extra-hosts "{{server_fqdn}}:{{hostvars['gitlab']['private_v4']}}"
+  become: True

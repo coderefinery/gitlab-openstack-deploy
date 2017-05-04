@@ -1,6 +1,7 @@
 - name: pull the image
   docker_image:
     name: "gitlab/gitlab-ce:{{ gitlab_tag }}"
+  become: True
 
 - name: start the container
   docker_container:
@@ -18,5 +19,5 @@
       - "/srv/gitlab/data:/var/opt/gitlab:Z"
       - "/srv/gitlab/data:/var/opt/gitlab:Z"
       - "/srv/gitlab/config/backups:/secret/gitlab/backups:Z"
-
+  become: True
 

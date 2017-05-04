@@ -23,6 +23,7 @@
     flavor: "{{ server_flavor }}"
     auto_ip: no
     security_groups:
+      - "{{ gitlab_name }}-common-group"
       - "{{ gitlab_name }}-ssh-from-local"
   register: backup_server
 

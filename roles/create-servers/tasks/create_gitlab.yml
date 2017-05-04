@@ -32,33 +32,58 @@
 
 - name: create public security group
   os_security_group:
-    name: "{{ gitlab_name }}-public-sg"
+    name: "{{ gitlab_name }}-internal-sg"
     description: "[ansible] automatically created security group for {{ gitlab_name  }}"
   register: public_security_group
 
-- name: security group for SSH from everywhere
+- name: security group for SSH from inside CSC
   os_security_group_rule:
-    security_group: "{{ gitlab_name }}-public-sg"
+    security_group: "{{ gitlab_name }}-internal-sg"
     protocol: tcp
     port_range_min: 10022
     port_range_max: 10022
-    remote_ip_prefix: 0.0.0.0/0
+    remote_ip_prefix: 193.166.85.0/24
 
-- name: security group for HTTP from everywhere
+- name: security group for SSH from inside CSC
   os_security_group_rule:
-    security_group: "{{ gitlab_name }}-public-sg"
+    security_group: "{{ gitlab_name }}-internal-sg"
     protocol: tcp
-    port_range_min: 80
-    port_range_max: 80
-    remote_ip_prefix: 0.0.0.0/0
+    port_range_min: 10022
+    port_range_max: 10022
+    remote_ip_prefix:  193.166.2.0/24
 
-- name: security group for HTTPS from everywhere
+- name: security group for SSH from inside CSC
   os_security_group_rule:
-    security_group: "{{ gitlab_name }}-public-sg"
+    security_group: "{{ gitlab_name }}-internal-sg"
+    protocol: tcp
+    port_range_min: 10022
+    port_range_max: 10022
+    remote_ip_prefix:  193.166.1.0/24
+
+
+- name: security group for SSL from inside CSC
+  os_security_group_rule:
+    security_group: "{{ gitlab_name }}-internal-sg"
     protocol: tcp
     port_range_min: 443
     port_range_max: 443
-    remote_ip_prefix: 0.0.0.0/0
+    remote_ip_prefix: 193.166.85.0/24
+
+- name: security group for SSL from inside CSC
+  os_security_group_rule:
+    security_group: "{{ gitlab_name }}-internal-sg"
+    protocol: tcp
+    port_range_min: 443
+    port_range_max: 443
+    remote_ip_prefix:  193.166.2.0/24
+
+- name: security group for SSL from inside CSC
+  os_security_group_rule:
+    security_group: "{{ gitlab_name }}-internal-sg"
+    protocol: tcp
+    port_range_min: 443
+    port_range_max: 443
+    remote_ip_prefix:  193.166.1.0/24
 
 - name: create volumes
   os_volume:
@@ -77,6 +102,7 @@
     flavor: "{{ server_flavor }}"
     #auto_ip: yes
     security_groups:
+      - "{{ gitlab_name }}-common-group"
       - "{{ gitlab_name }}-ssh-from-csc"
       - "{{ gitlab_name }}-public-sg"
     floating_ips:
@@ -99,4 +125,4 @@
     ansible_ssh_host: "{{ gitlab_server.openstack.interface_ip }}"
     ansible_ssh_port: 22
     ansible_ssh_user: cloud-user
-
+    private_v4: "{{ gitlab_server.openstack.private_v4 }}"
