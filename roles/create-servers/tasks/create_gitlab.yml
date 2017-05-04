@@ -32,13 +32,13 @@
 
 - name: create public security group
   os_security_group:
-    name: "{{ gitlab_name }}-internal-sg"
+    name: "{{ gitlab_name }}-public-sg"
     description: "[ansible] automatically created security group for {{ gitlab_name  }}"
   register: public_security_group
 
 - name: security group for SSH from inside CSC
   os_security_group_rule:
-    security_group: "{{ gitlab_name }}-internal-sg"
+    security_group: "{{ gitlab_name }}-public-sg"
     protocol: tcp
     port_range_min: 10022
     port_range_max: 10022
@@ -46,7 +46,7 @@
 
 - name: security group for SSH from inside CSC
   os_security_group_rule:
-    security_group: "{{ gitlab_name }}-internal-sg"
+    security_group: "{{ gitlab_name }}-public-sg"
     protocol: tcp
     port_range_min: 10022
     port_range_max: 10022
@@ -54,7 +54,7 @@
 
 - name: security group for SSH from inside CSC
   os_security_group_rule:
-    security_group: "{{ gitlab_name }}-internal-sg"
+    security_group: "{{ gitlab_name }}-public-sg"
     protocol: tcp
     port_range_min: 10022
     port_range_max: 10022
@@ -63,7 +63,7 @@
 
 - name: security group for SSL from inside CSC
   os_security_group_rule:
-    security_group: "{{ gitlab_name }}-internal-sg"
+    security_group: "{{ gitlab_name }}-public-sg"
     protocol: tcp
     port_range_min: 443
     port_range_max: 443
@@ -71,7 +71,7 @@
 
 - name: security group for SSL from inside CSC
   os_security_group_rule:
-    security_group: "{{ gitlab_name }}-internal-sg"
+    security_group: "{{ gitlab_name }}-public-sg"
     protocol: tcp
     port_range_min: 443
     port_range_max: 443
@@ -79,7 +79,7 @@
 
 - name: security group for SSL from inside CSC
   os_security_group_rule:
-    security_group: "{{ gitlab_name }}-internal-sg"
+    security_group: "{{ gitlab_name }}-public-sg"
     protocol: tcp
     port_range_min: 443
     port_range_max: 443
