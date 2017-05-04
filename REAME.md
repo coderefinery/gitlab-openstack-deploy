@@ -92,3 +92,13 @@ easier to check the names of variables in the vault without decrypting it all th
 
 Initial installation root password is stored inside the vault. Check that to
 log in and start managing the server if installing from scratch.
+
+### SSL
+
+SSL keys were created by using certbot. There is a part called letsencrypt
+that will in theory re-generate the certificates using a brand new ansible
+module. This is doubtable in practice and someone should re-generate the
+certificates manually before summer holidays 2017.
+
+The playbook for letsencrypt is included but disabled in case there is time to
+work on it.

@@ -15,7 +15,16 @@
     - python-pip
     - sysstat
     - iptables-services
+    - epel-release
   become: True
+
+- name: install yum packages from epel
+  yum:
+    state: installed
+    name:
+    - letsencrypt
+  become: True
+  when: False
 
 - name: create docker group
   group:
@@ -65,10 +74,10 @@
   become: True
 
 
-- name: upload public SSL key
+- name: upload public SSL CSR
   copy:
-    src: cert.pem
-    dest: /srv/gitlab/config/ssl/{{ server_fqdn }}.crt
+    src: "{{ server_fqdn }}.csr"
+    dest: /srv/gitlab/config/ssl/{{ server_fqdn }}.csr
     mode: 0644
     setype: svirt_sandbox_file_t
     #    owner: "{{ ansible_user }}"
@@ -81,9 +90,19 @@
     dest: /srv/gitlab/config/ssl/{{ server_fqdn }}.key
     mode: 0600
     setype: svirt_sandbox_file_t
-    #owner: "{{ ansible_user }}"
-    #group: "{{ ansible_user }}"
   become: True
+
+- name: upload  CRT
+  copy:
+    src: "{{ server_fqdn }}.crt"
+    dest: /srv/gitlab/config/ssl/{{ server_fqdn }}.crt
+    mode: 0644
+    setype: svirt_sandbox_file_t
+  become: True
+  notify:
+    - reload nginx
+    - recreate configs
+  register: CRT
 
 
 - name: upload gitlab.rb
@@ -95,6 +114,9 @@
     #owner: "{{ ansible_user }}"
     #group: "{{ ansible_user }}"
   become: True
+
+- include: letsencrypt.yml
+  when: False
 
 - include: gitlab_docker.yml
 - include: setup_backup.yml

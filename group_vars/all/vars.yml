@@ -2,7 +2,7 @@
 gitlab_tag: latest
 
 gitlab_name: gitlab-test
-server_name: gitlab-test.coderefinery.org
+server_name: source.coderefinery.org
 public_ip: 86.50.168.91
 private_network: 192.168.44.*
 private_network_cidr: 192.168.44.0/24
@@ -31,5 +31,6 @@ extra_volumes:
 gitlab_root_password: "{{ vaulted_gitlab_root_password }}"
 ssl_certificate_key: "{{ vaulted_ssl_certificate_key }}"
 id_rsa_gitlab_backup: "{{ vaulted_id_rsa_gitlab_backup }}"
+contact_email: "{{ vaulted_contact_email }}"
 
 runner_registration_token: "{{ vaulted_runner_registration_token }}"

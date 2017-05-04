@@ -1,0 +1,42 @@
+- letsencrypt:
+    account_key:  /srv/gitlab/config/ssl/{{ server_fqdn }}.key
+    csr:  /srv/gitlab/config/ssl/{{ server_fqdn }}.csr
+    dest:  /srv/gitlab/config/ssl/{{ server_fqdn }}.crt
+    account_email: "{{ contact_email }}"
+  register: gitlab_challenge
+  become: True
+
+- name: add new config key to nginx config if line changed
+  blockinfile:
+    dest: /srv/gitlab/config/gitlab.rb
+    marker: "# {mark} letsencrypt authentication"
+    block: >
+      nginx['custom_gitlab_server_config'] = "
+      location {{ gitlab_challenge['challenge_data'][server_fqdn]['http-01']['resource']}}
+      {
+        proxy_cache off;
+        return 200 "{{ gitlab_challenge['challenge_data'][server_fqdn]['http-01']['resource_value'] }}";
+      }
+      "
+  when: gitlab_challenge|changed
+  become: True
+
+- name: recreate configs
+  shell: docker exec -t gitlab gitlab-ctl reconfigure
+  become: True
+  when: gitlab_challenge|changed
+
+- name: reload nginx
+  shell: docker exec -t gitlab gitlab-ctl restart nginx
+  become: True
+  when: gitlab_challenge|changed
+
+
+- letsencrypt:
+    account_key:  /srv/gitlab/config/ssl/{{ server_fqdn }}.key
+    csr:  /srv/gitlab/config/ssl/{{ server_fqdn }}.csr
+    dest:  /srv/gitlab/config/ssl/{{ server_fqdn }}.crt
+    data: "{{ gitlab_challenge }}"
+  become: True
+  notify:
+    - reload nginx

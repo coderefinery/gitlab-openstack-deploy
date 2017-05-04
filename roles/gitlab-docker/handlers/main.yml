@@ -1,0 +1,7 @@
+- name: recreate configs
+  shell: docker exec -t gitlab gitlab-ctl reconfigure
+  become: True
+
+- name: reload nginx
+  shell: docker exec -t gitlab gitlab-ctl restart nginx
+  become: True
