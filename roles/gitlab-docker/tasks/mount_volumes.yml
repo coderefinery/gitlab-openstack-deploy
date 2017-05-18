@@ -9,8 +9,6 @@
   file:
     path: /srv/gitlab/
     state: directory
-    #    owner: "{{ ansible_user }}"
-    #group: "{{ ansible_user }}"
     setype: svirt_sandbox_file_t
     mode: 0744
   become: True
@@ -27,8 +25,6 @@
 - name: ensure files are of svirt_sandbox_file_t
   file:
     setype: svirt_sandbox_file_t
-    #owner: "{{ ansible_user }}"
-    #group: "{{ ansible_user }}"
     recurse: true
     path: "{{ item.mountpoint }}"
   with_items: "{{ extra_volumes }}"

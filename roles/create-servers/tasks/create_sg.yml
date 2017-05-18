@@ -1,70 +1,32 @@
-- name: create ssh from csc security group
+- name: create admin access security group
   os_security_group:
-    name: "{{ gitlab_name }}-ssh-from-csc"
+    name: "{{ gitlab_name }}-external-sg"
     description: "[ansible] automatically created security group for {{ gitlab_name  }}"
   register: admin_security_group
 
-- name: security group for SSH from CSC
+- name: security group for SSH to_host
   os_security_group_rule:
-    security_group: "{{ gitlab_name }}-ssh-from-csc"
+    security_group: "{{ gitlab_name }}-external-sg"
     protocol: tcp
-    port_range_min: 22
-    port_range_max: 22
-    remote_ip_prefix: 193.166.85.0/24
+    port_range_min: "{{ item.port_range_min }}"
+    port_range_max: "{{ item.port_range_min }}"
+    remote_ip_prefix: "{{ item.remote_ip_prefix }}"
+  with_items: "{{ firewall_rules }}"
 
-- name: security group for SSH from CSC
-  os_security_group_rule:
-    security_group: "{{ gitlab_name }}-ssh-from-csc"
-    protocol: tcp
-    port_range_min: 22
-    port_range_max: 22
-    remote_ip_prefix: 193.166.2.0/24
-
-- name: security group for SSH from CSC
-  os_security_group_rule:
-    security_group: "{{ gitlab_name }}-ssh-from-csc"
-    protocol: tcp
-    port_range_min: 22
-    port_range_max: 22
-    remote_ip_prefix: 193.166.1.0/24
-
-- name: create ssh from intranet group
+- name: create internal security group between instances
   os_security_group:
-    name: "{{ gitlab_name }}-ssh-from-local"
-    description: "[ansible] automatically created security group for {{ gitlab_name  }}"
-  register: admin_security_group
-
-- name: security group for SSH from CSC
-  os_security_group_rule:
-    security_group: "{{ gitlab_name }}-ssh-from-local"
-    protocol: tcp
-    port_range_min: 22
-    port_range_max: 22
-    remote_ip_prefix: "{{ private_network_cidr }}"
-
-- name: create common security group for internal permissions
-  os_security_group:
-    name: "{{ gitlab_name }}-common-group"
+    name: "{{ gitlab_name }}-internal-sg"
     description: "[ansible] automatically created security group for {{ gitlab_name  }}"
   register: common_security_group
 
-- name: security group for things internal to parts of the deployment
-  os_security_group_rule:
-    security_group: "{{ gitlab_name }}-common-group"
-    protocol: tcp
-    port_range_min: 0
-    port_range_max: 10000
-    remote_group: "{{ common_security_group.secgroup.id }}"
 
 - name: security group for things internal to parts of the deployment
   os_security_group_rule:
-    security_group: "{{ gitlab_name }}-common-group"
-    protocol: udp
-    port_range_min: 0
-    port_range_max: 10000
+    security_group: "{{ gitlab_name }}-internal-sg"
+    protocol: "{{ item }}"
     remote_group: "{{ common_security_group.secgroup.id }}"
-
-
-
-
+  with_items:
+    - "tcp"
+    - "udp"
+    - "icmp"
 

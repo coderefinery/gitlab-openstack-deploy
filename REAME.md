@@ -1,10 +1,10 @@
-# CodeRefinery Gitlab Devops
+# Gitlab Devops
 
-This repository contains Ansible playbooks for administering the CodeRefinery
-gitlab installation. It should not be kept on the gitlab installation to avoid
-obvious chicken-egg problems.
+This repository contains Ansible playbooks for administering the gitlab
+installations on OpenStack.. It should not be kept on the gitlab installation
+to avoid obvious chicken-egg problems.
 
-### Setting up the environment
+### Setting up the Python environment
 
 This assumes you have virtualenvwrapper, virtualenv and in general Python
 installed.
@@ -17,28 +17,55 @@ On subsequent uses it suffices to activate the virtual environment
   $ workon cr-gitlab-devops
   (cr-gitlab-devops)$
 
+### Setting up environment variables
+
+This repository does not contain per-installation data.
+
+The data is expected to be found thus
+
+  repo/
+    playbook.yml
+    roles/...
+    environment/ # here you can have multiple environments
+      coderefinery-gitlab/ # symlink to a separate repo
+        hosts
+        group_vars/
+          all/
+            vars.yml
+            vault.yml
+            ansible.cfg
+            other.yml
+      another-gitlab/
+        hosts
+        group_vars
+          all/
+            vars.yml
+            vault.yml
+            something_completely_different.yml
+
+To create a new set of environment variables it is suggested to copy an
+existing set for simplicity.
 
 ## Playbook
 
-There is (will be) a playbook called playbook.yml. The playbook will provision
+There roles are run with playbook called playbook.yml. The playbook will provision
 the necessary resources from OpenStack and configure the system as much as
 possible.
 
-It requires certain environment variables for OpenStack authentication.
-The password, at least will be distributed separately in this stage. In step 2
-a separate user account will be created and an Ansible vault will be
-established for secrets.
-
+It requires certain environment variables for OpenStack authentication called
+an OpenRC.
 
   (cr-gitlab-devops)$ source project-openrc.sh
   Please enter your OpenStack Password:
   (cr-gitlab-devops)$
 
-
 Then you can run the actual playbook provided you have the vault password.
 
-  (cr-gitlab-devops)$ ansible-playbook playbook.yml
+  (cr-gitlab-devops)$ export ANSIBLE\_CONFIG=~/path/to/coderefinery-gitlab/ansible.cfg
+  ansible-playbook playbook.yml -i environments/coderefinery-gitlab/hosts
   Vault password:
+
+and Bob is your uncle!
 
 #### Ansible vault
 
@@ -75,13 +102,12 @@ IP address.
 
 To communicate with the other two parts run
 
-    $ ssh -F ssh.cfg gitlab-runner / gitlab-backup
+    $ ssh -F ssh.{{gitlab_name}}.cfg gitlab-runner / gitlab-backup
 
 ### Configuring
 
 Most configuration is in group\_vars/all/vars.yml or the vault.yml that was
-already covered. Moving per-role variables to the corresponding role is a TODO
-item.
+already covered.
 
 Most values should be self-explanatory. If in doubt try grepping for how they
 are used.
@@ -102,3 +128,36 @@ certificates manually before summer holidays 2017.
 
 The playbook for letsencrypt is included but disabled in case there is time to
 work on it.
+
+### Recovering backups
+
+1) obtain files and copy them to remote machine, e.g.
+
+        [cloud-user@gitlab-internal tmp]$ ls -alhZ
+        drwxrwxrwt. root       root       system_u:object_r:tmp_t:s0       .
+        drwxr-xr-x. root       root       system_u:object_r:root_t:s0      ..
+        -rw-------. cloud-user cloud-user unconfined_u:object_r:user_tmp_t:s0
+        1495065614_2017_05_18_gitlab_backup.tar
+        -rw-------. cloud-user cloud-user unconfined_u:object_r:user_tmp_t:s0
+        etc-gitlab-1495065602.tgz
+
+2)  copy  xxxx_gitlab_backup.tar to /srv/gitlab/data/backups
+    chmod 0755 /srv/gitlab/data/backups/xxx_gitlab_backup.tar
+
+  copy etc-gitlab-XXX.tgz to /srv/gitlab/config/backups/ (optional, you can
+  pack it wherever you like)
+
+3) shutdown stuff that uses the database
+
+   docker exec -it gitlab gitlab-ctl stop unicorn
+   docker exec -it gitlab gitlab-ctl stop unicorn
+
+4) unpack the config .tgz, copy files you wish to replace (everything except
+gitlab.rb probably, unless you changed certificates)
+
+5) run
+
+   docker exec -it gitlab gitlab-rake gitlab:backup:restore \
+   BACKUP=1495065614_2017_05_18
+
+with the timestamp of the backup. Answer YES to everything.

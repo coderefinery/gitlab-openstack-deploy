@@ -1,9 +1,23 @@
 ---
+
+- name: assert things about variables
+  assert:
+    that:
+      - "keypair_name is defined"
+      - "server_fqdn is defined"
+      - "network_id is defined"
+      - "public_ip is defined"
+      - "gitlab_name is defined"
+      - "ansible_user is defined"
+      - "backup_device is defined"
+      - "extra_volumes is defined"
+
 - name: add keypair
   os_keypair:
     name: "{{ keypair_name }}"
-    public_key:  "{{ lookup('file', 'id_rsa_gitlab_server.pub' ) }}"
+    public_key:  "{{ deployment_ssh_pubkey }}"
   register: keypair
+  when: deployment_ssh_pubkey is defined
 
 - include: create_sg.yml
 
@@ -17,7 +31,7 @@
 
 - name: add ssh alias for forwarding to local config
   blockinfile:
-    dest:  ssh.cfg
+    dest: ssh.cfg
     backup: no
     mode: 0700
     create: yes
@@ -32,7 +46,7 @@
 
 - name: add gitlab
   blockinfile:
-    dest:  ssh.cfg
+    dest:  "ssh.{{ gitlab_name }}.cfg"
     backup: no
     mode: 0700
     create: yes
@@ -44,7 +58,7 @@
 
 - name: add ssh alias to local ssh config
   blockinfile:
-    dest:  ssh.cfg
+    dest:  "ssh.{{ gitlab_name }}.cfg"
     backup: no
     mode: 0700
     create: yes
@@ -53,11 +67,11 @@
       Host gitlab-backup
       HostName {{ backup_server.openstack.private_v4 }}
       User {{ ansible_user }}
-      ProxyCommand ssh -W %h:%p {{ ansible_user }}@{{ server_fqdn }}
+      ProxyCommand ssh -W %h:%p {{ ansible_user }}@{{ gitlab_server.openstack.interface_ip }}
 
 - name: add ssh alias to local ssh config
   blockinfile:
-    dest:  ssh.cfg
+    dest:  "ssh.{{ gitlab_name }}.cfg"
     backup: yes
     mode: 0700
     create: yes
@@ -66,5 +80,4 @@
       Host gitlab-runner
       HostName {{ gitlab_runner.openstack.private_v4 }}
       User {{ ansible_user }}
-      ProxyCommand ssh -W %h:%p {{ ansible_user }}@{{ server_fqdn }}
-  when: runner_registration_token|default("") != ""
+      ProxyCommand ssh -W %h:%p {{ ansible_user }}@{{ gitlab_server.openstack.interface_ip }}

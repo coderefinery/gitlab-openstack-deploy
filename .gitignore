@@ -1,3 +1,6 @@
 # ssh.cfg should be created by the provisioning part
 # no need to track it
-ssh.cfg
+ssh.*
+#ansible artefact
+*.retry
+.idea/

@@ -20,11 +20,10 @@
     image: "{{ image_name }}"
     key_name: "{{ keypair_name }}"
     timeout: 200
-    flavor: "{{ server_flavor }}"
+    flavor: "{{ backup_flavor|default(server_flavor) }}"
     auto_ip: no
     security_groups:
-      - "{{ gitlab_name }}-common-group"
-      - "{{ gitlab_name }}-ssh-from-local"
+      - "{{ gitlab_name }}-internal-sg"
   register: backup_server
 
 - name: attach backup volume

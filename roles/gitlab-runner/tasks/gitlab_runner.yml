@@ -1,14 +1,12 @@
-#always use latest gitlab-runner as it may have security patches
-
 - name: pull the image
   docker_image:
-    name: "gitlab/gitlab-runner:latest"
+    name: "gitlab/gitlab-runner:{{ gitlab_runner_tag }}"
   become: True
 
 - name: start the container
   docker_container:
     name: gitlab-runner
-    image:  "gitlab/gitlab-runner:latest"
+    image:  "gitlab/gitlab-runner:{{ gitlab_runner_tag }}"
     state: started
     restart_policy: always
     volumes:

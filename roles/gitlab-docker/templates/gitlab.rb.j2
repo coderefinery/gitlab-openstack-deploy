@@ -10,15 +10,17 @@ gitlab_rails['gitlab_shell_ssh_port'] = 10022
 #tokens.
 #####! **Only applicable on initial setup, changing these settings after database
 #####!   is created and seeded won't yield any change.**
-gitlab_rails['initial_root_password'] = "{{ gitlab_root_password }}"
+gitlab_rails['initial_root_password'] = '{{ gitlab_root_password }}'
 
 
 gitlab_rails['smtp_enable'] = true
 gitlab_rails['smtp_address'] = 'smtp.sdn.csc.fi'
 
 
-gitlab_rails['gitlab_email_from'] = 'jyry.suvilehto@csc.fi'
-gitlab_rails['gitlab_email_display_name'] = 'Gitlab admin Jay'
+gitlab_rails['gitlab_email_from'] = '{{ gitlab_email_from }}'
+gitlab_rails['gitlab_email_display_name'] = '{{ gitlab_email_display_name }}'
+
+gitlab_rails['initial_shared_runners_registration_token'] = '{{ runner_registration_token }}'
 
 # only admins can create groups
 #gitlab_rails['gitlab_default_can_create_group'] = false

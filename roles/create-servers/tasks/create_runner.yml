@@ -9,8 +9,7 @@
     flavor: "{{ runner_flavor }}"
     auto_ip: false
     security_groups:
-      - "{{ gitlab_name }}-common-group"
-      - "{{ gitlab_name }}-ssh-from-local"
+      - "{{ gitlab_name }}-internal-sg"
   register: gitlab_runner
 
 - name: add gitlab_runner to inventory

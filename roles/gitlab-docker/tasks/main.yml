@@ -1,4 +1,17 @@
 ---
+- name: assert things about variables
+  assert:
+    that:
+      - "backup_public_key is defined"
+      - "server_fqdn is defined"
+      - "server_name is defined"
+      - "public_ip is defined"
+      - "contact_email is defined"
+      - "ssl_certificate_key is defined"
+      - "gitlab_tag is defined"
+      - "extra_volumes is defined"
+      - "public_ssl_certificate is defined"
+
 - name: install yum packages
   yum:
     state: installed
@@ -69,8 +82,6 @@
     state: directory
     mode: 0644
     setype: svirt_sandbox_file_t
-    #    owner: "{{ ansible_user }}"
-    #group: "{{ ansible_user }}"
   become: True
 
 
@@ -80,9 +91,8 @@
     dest: /srv/gitlab/config/ssl/{{ server_fqdn }}.csr
     mode: 0644
     setype: svirt_sandbox_file_t
-    #    owner: "{{ ansible_user }}"
-    #group: "{{ ansible_user }}"
   become: True
+  when: False
 
 - name: upload private SSL key
   copy:
@@ -94,7 +104,7 @@
 
 - name: upload  CRT
   copy:
-    src: "{{ server_fqdn }}.crt"
+    content: "{{ public_ssl_certificate }}"
     dest: /srv/gitlab/config/ssl/{{ server_fqdn }}.crt
     mode: 0644
     setype: svirt_sandbox_file_t
@@ -111,8 +121,7 @@
     dest: /srv/gitlab/config/gitlab.rb
     mode: 0644
     setype: svirt_sandbox_file_t
-    #owner: "{{ ansible_user }}"
-    #group: "{{ ansible_user }}"
+
   become: True
 
 - include: letsencrypt.yml
@@ -125,7 +134,7 @@
   authorized_key:
     user: root
     state: present
-    key: "{{ lookup('file', 'id_rsa_gitlab_backup.pub') }}"
+    key: "{{ backup_public_key }}"
   become: True
 
 
