@@ -69,17 +69,20 @@
     setype: svirt_sandbox_file_t
     mode: 0744
   become: True
+  when: self_signed_certificate|length > 1
 
 
 - name: upload self-signed cert
   copy:
     dest: /srv/gitlab-runner/config/certs/ca.crt
-    src: cert.pem
+    content: "{{ self_signed_cert }}"
     owner: "{{ ansible_user }}"
     group: "{{ ansible_user }}"
     setype: svirt_sandbox_file_t
     mode: 0744
   become: True
+  when: self_signed_certificate|length > 1
+
 
 - name: disable selinux to permit using hosts docker for builds
   selinux:

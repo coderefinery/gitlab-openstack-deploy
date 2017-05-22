@@ -1,1 +1,3 @@
 gitlab_runner_tag: latest
+
+self_signed_certificate: ""
