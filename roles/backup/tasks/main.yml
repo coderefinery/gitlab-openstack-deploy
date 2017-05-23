@@ -3,7 +3,7 @@
   filesystem:
    dev: "{{ backup_device }}"
    fstype: xfs
-  when: backup_device is defined
+  when: backup_device is defined and environment_type == "production"
   become: True
 
 - name: mount image device
@@ -12,7 +12,7 @@
     src: "{{ backup_device }}"
     state: mounted
     fstype: xfs
-  when: backup_device is defined
+  when: backup_device is defined and environment_type == "production"
   become: True
 
 - name: set permissions on image volume mount
@@ -51,13 +51,24 @@
     group: cloud-user
   become: True
 
+- name: ensure ssh key exists
+  command: "ssh-keyscan -p {{ gitlab_control_port }} -H {{ hostvars['gitlab']['ansible_default_ipv4']['address'] }}"
+  register: new_host_fingerprint
+
+- lineinfile:
+    dest: ~cloud-user/.ssh/known_hosts
+    line: "{{ item }}"
+    create: yes
+  with_items:
+    - "{{ new_host_fingerprint.stdout_lines }}"
+
 - name: set up cron job for data backup
   cron:
     name: "job for data backup"
     #daily on host seems to run at midnight, this is well past that
     hour: "3"
     minute: "10"
-    job: rsync -atz root@{{ hostvars['gitlab']['ansible_default_ipv4']['address'] }}:/srv/gitlab/data/backups/ /backup/data/
+    job: rsync -atz -e "ssh -p {{ gitlab_control_port }}" root@{{ hostvars['gitlab']['ansible_default_ipv4']['address'] }}:/srv/gitlab/data/backups/ /backup/data/
     user: cloud-user
   become: True
 
@@ -66,7 +77,7 @@
     name: "job for sensitive backup"
     hour: "3"
     minute: "5"
-    job: rsync -atz root@{{ hostvars['gitlab']['ansible_default_ipv4']['address'] }}:/srv/gitlab/config/backups/ /backup/secret/
+    job: rsync -atz -e "ssh -p {{ gitlab_control_port }}" root@{{ hostvars['gitlab']['ansible_default_ipv4']['address'] }}:/srv/gitlab/config/backups/ /backup/secret/
     user: cloud-user
   become: True
 

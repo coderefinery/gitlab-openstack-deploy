@@ -74,6 +74,7 @@
 
 
 - include: mount_volumes.yml
+  when: environment_type == "production"
 
 
 - name: create ssl dir

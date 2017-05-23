@@ -5,6 +5,8 @@
     display_name: "{{ item.name }}"
     display_description: "[ansible] volume for server {{ gitlab_name }}"
   with_items: "{{ extra_volumes }}"
+  when: environment_type == "production"
+
 
 - name: Create the actual gitlab server
   os_server:
@@ -20,7 +22,13 @@
       - "{{ gitlab_name }}-internal-sg"
     floating_ips:
       - "{{ public_ip }}"
-
+     # starts the sshd in a nonstandard port to permit 22 to be saved for the container
+    userdata: |
+      #cloud-config
+      runcmd:
+        - sed -i -e "/^#Port/s/^.*$/Port {{ gitlab_control_port }}/" /etc/ssh/sshd_config
+        - semanage port -a -t ssh_port_t -p tcp {{ gitlab_control_port }}
+        - service sshd restart
   register: gitlab_server
 
 - name: attach volumes
@@ -30,12 +38,14 @@
     volume: "{{ item.name }}"
     device: "{{ item.device }}"
   with_items: "{{ extra_volumes }}"
+  when: environment_type == "production"
+
 
 - name: add gitlab_server
   add_host:
     name: gitlab
     groups: gitlab-docker
     ansible_ssh_host: "{{ gitlab_server.openstack.interface_ip }}"
-    ansible_ssh_port: 22
+    ansible_ssh_port: "{{ gitlab_admin_port }}"
     ansible_ssh_user: cloud-user
     private_v4: "{{ gitlab_server.openstack.private_v4 }}"

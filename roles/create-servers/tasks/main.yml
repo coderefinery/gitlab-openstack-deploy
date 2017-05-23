@@ -55,6 +55,7 @@
       Host gitlab
       HostName {{ gitlab_server.openstack.interface_ip }}
       User {{ ansible_user }}
+      Port {{ gitlab_control_port }}
 
 - name: add ssh alias to local ssh config
   blockinfile:
@@ -67,12 +68,12 @@
       Host gitlab-backup
       HostName {{ backup_server.openstack.private_v4 }}
       User {{ ansible_user }}
-      ProxyCommand ssh -W %h:%p {{ ansible_user }}@{{ gitlab_server.openstack.interface_ip }}
+      ProxyCommand ssh -p {{ gitlab_control_port }} -W %h:%p {{ ansible_user }}@{{ gitlab_server.openstack.interface_ip }}
 
 - name: add ssh alias to local ssh config
   blockinfile:
     dest:  "ssh.{{ gitlab_name }}.cfg"
-    backup: yes
+    backup: no
     mode: 0700
     create: yes
     marker: "# {mark} ANSIBLE MANAGED BLOCK for cr-gitlab-runner"
@@ -80,4 +81,4 @@
       Host gitlab-runner
       HostName {{ gitlab_runner.openstack.private_v4 }}
       User {{ ansible_user }}
-      ProxyCommand ssh -W %h:%p {{ ansible_user }}@{{ gitlab_server.openstack.interface_ip }}
+      ProxyCommand ssh -p {{ gitlab_control_port }} -W %h:%p {{ ansible_user }}@{{ gitlab_server.openstack.interface_ip }}

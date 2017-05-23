@@ -1,4 +1,6 @@
 gitlab_tag: "latest"
-gitlab_ssh_port: 10022
 gitlab_email_from: "{{ contact_email }}"
 gitlab_email_display_name: "{{ gitlab_name }} notifications"
+
+# controls mounting volumes atm
+environment_type: test

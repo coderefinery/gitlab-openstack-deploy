@@ -1,0 +1,4 @@
+#controls mounting extra volumes
+environment_type: test
+
+gitlab_control_port: 10022
