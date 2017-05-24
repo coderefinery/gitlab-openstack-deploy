@@ -12,4 +12,7 @@ server_flavor: io.70GB
 runner_flavor: io.70GB
 
 ansible_user: cloud-user
-gitlab_ssh_port: 10022
+gitlab_control_port: 10022
+
+#controls creating extra volumes and possibly other things in the future
+environment_type: test

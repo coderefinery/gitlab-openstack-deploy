@@ -12,7 +12,7 @@
     ports:
       - "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:80:80"
       - "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:443:443"
-      - "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:{{ gitlab_ssh_port }}:22"
+      - "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}:22:22"
     volumes:
       - "/srv/gitlab/config:/etc/gitlab:Z"
       - "/srv/gitlab/logs:/var/log/gitlab:Z"

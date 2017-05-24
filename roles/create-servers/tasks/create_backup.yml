@@ -12,6 +12,7 @@
     display_name: "{{ gitlab_name }}-backups"
     display_description: "[ansible] volume for server {{ gitlab_name }}-backup"
   register: data_volume
+  when: environment_type == "production"
 
 - name: Create the gitlab backup server
   os_server:
@@ -32,6 +33,7 @@
     server: "{{ gitlab_name }}-backup"
     volume:  "{{ gitlab_name }}-backups"
     device: "{{ backup_device }}"
+  when: environment_type == "production"
 
 - name: add backup_server to inventory
   add_host:

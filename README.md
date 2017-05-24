@@ -150,7 +150,7 @@ work on it.
 3) shutdown stuff that uses the database
 
    docker exec -it gitlab gitlab-ctl stop unicorn
-   docker exec -it gitlab gitlab-ctl stop unicorn
+   docker exec -it gitlab gitlab-ctl stop sidekiq
 
 4) unpack the config .tgz, copy files you wish to replace (everything except
 gitlab.rb probably, unless you changed certificates)
