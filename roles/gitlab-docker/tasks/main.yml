@@ -112,7 +112,7 @@
   become: True
   notify:
     - reload nginx
-    - recreate configs
+    - refresh configs
   register: CRT
 
 
@@ -122,6 +122,8 @@
     dest: /srv/gitlab/config/gitlab.rb
     mode: 0644
     setype: svirt_sandbox_file_t
+  notify:
+    - refresh configs
 
   become: True
 

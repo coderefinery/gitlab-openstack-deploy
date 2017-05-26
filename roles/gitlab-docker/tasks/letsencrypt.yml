@@ -21,7 +21,7 @@
   when: gitlab_challenge|changed
   become: True
 
-- name: recreate configs
+- name: recreate configs immediately after certificate change
   shell: docker exec -t gitlab gitlab-ctl reconfigure
   become: True
   when: gitlab_challenge|changed
