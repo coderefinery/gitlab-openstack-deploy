@@ -1,11 +1,5 @@
 ---
 
-- name: create backup
-  os_security_group:
-    name: "{{ gitlab_name }}-backup-sg"
-    description: "[ansible] automatically created security group for {{ gitlab_name  }} backup"
-  register: admin_security_group
-
 - name: create an extra volume for backups
   os_volume:
     size: 200 # gb
