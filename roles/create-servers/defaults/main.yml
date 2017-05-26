@@ -16,3 +16,9 @@ gitlab_control_port: 10022
 
 #controls creating extra volumes and possibly other things in the future
 environment_type: test
+
+# these default to yes but can be set to no to avoid creating extra instances
+# or if e.g. backup server is in a different domain (in which case an entry in hosts is required)
+create_runner: yes
+create_backup: yes
+

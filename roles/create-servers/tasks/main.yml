@@ -23,11 +23,16 @@
 
 - include: create_gitlab.yml
 
-
 - include: create_backup.yml
+  when: create_backup
 
 - include: create_runner.yml
-  when: runner_registration_token|default("") != ""
+  when: runner_registration_token|default("") != "" and create_runner
+
+- name: pause for 10 seconds to let cloud-init work it's magic if backup and runner weren't created
+  pause:
+    seconds: 10
+  when: not create_runner and not create_backup
 
 - name: add ssh alias for forwarding to local config
   blockinfile:
@@ -69,6 +74,7 @@
       HostName {{ backup_server.openstack.private_v4 }}
       User {{ ansible_user }}
       ProxyCommand ssh -p {{ gitlab_control_port }} -W %h:%p {{ ansible_user }}@{{ gitlab_server.openstack.interface_ip }}
+  when: create_backup
 
 - name: add ssh alias to local ssh config
   blockinfile:
@@ -82,3 +88,4 @@
       HostName {{ gitlab_runner.openstack.private_v4 }}
       User {{ ansible_user }}
       ProxyCommand ssh -p {{ gitlab_control_port }} -W %h:%p {{ ansible_user }}@{{ gitlab_server.openstack.interface_ip }}
+  when: create_runner
