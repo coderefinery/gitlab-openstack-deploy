@@ -4,3 +4,5 @@ gitlab_email_display_name: "{{ gitlab_name }} notifications"
 
 # controls mounting volumes atm
 environment_type: test
+
+gitlab_extra_config: "#no extra config"
