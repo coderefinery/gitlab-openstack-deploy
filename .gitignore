@@ -4,3 +4,5 @@ ssh.*
 #ansible artefact
 *.retry
 .idea/
+# vim swap files
+*.swp
