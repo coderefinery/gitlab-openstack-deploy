@@ -6,25 +6,21 @@
 - name: start the container
   docker_container:
     name: gitlab-runner
-    image:  "gitlab/gitlab-runner:{{ gitlab_runner_tag }}"
+    image: "gitlab/gitlab-runner:{{ gitlab_runner_tag }}"
     state: started
     restart_policy: always
     volumes:
-      - "/srv/gitlab-runner/config:/etc/gitlab-runner:Z"
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      - /srv/gitlab-runner/config:/etc/gitlab-runner:Z
+      - /var/run/docker.sock:/var/run/docker.sock
+    env: "{{ runner_environment }}"
     etc_hosts: >
       {
         "{{ server_fqdn }}": "{{hostvars['gitlab']['private_v4']}}"
       }
-
   become: True
+  register: runner_start_result
 
 - name: register runner
-  shell: >
-        docker exec gitlab-runner gitlab-ci-multi-runner register
-        --non-interactive --url https://{{ server_fqdn }}/ci
-        -r {{ runner_registration_token }} --executor docker
-        --docker-image="ubuntu"
-        --description "ubuntu"
-        --docker-extra-hosts "{{server_fqdn}}:{{hostvars['gitlab']['private_v4']}}"
+  shell: "docker exec gitlab-runner gitlab-ci-multi-runner register"
   become: True
+  when: runner_start_result.changed

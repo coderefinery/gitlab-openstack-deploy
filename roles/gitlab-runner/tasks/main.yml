@@ -44,7 +44,7 @@
   service: name=docker state=started enabled=yes
   become: True
 
-- name: upgrade pip so package installs aren't broken
+- name: upgrade pip so package installs are not broken
   pip:
     name: pip
     state: latest
@@ -89,4 +89,8 @@
     state: disabled
   become: True
 
+- set_fact:
+    runner_environment: "{{ default_env_config|combine(env_config) }}"
+
 - include: gitlab_runner.yml
+  when: runner_environment.REGISTRATION_TOKEN is defined and runner_environment.REGISTRATION_TOKEN != ""

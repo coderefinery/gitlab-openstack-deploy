@@ -4,7 +4,7 @@ This repository contains Ansible playbooks for administering the gitlab
 installations on OpenStack.. It should not be kept on the gitlab installation
 to avoid obvious chicken-egg problems.
 
-### Setting up the Python environment
+## Setting up the Python environment
 
 This assumes you have virtualenvwrapper, virtualenv and in general Python
 installed.
@@ -17,7 +17,7 @@ On subsequent uses it suffices to activate the virtual environment
     $ workon cr-gitlab-devops
     (cr-gitlab-devops)$
 
-### Setting up environment variables
+## Setting up environment variables
 
 This repository does not contain per-installation data.
 
@@ -69,7 +69,7 @@ Then you can run the actual playbook provided you have the vault password.
 
 and Bob is your uncle!
 
-#### Ansible vault
+### Ansible vault
 
 To de-crypt the encrypted secrets found in group\_vars/all/vault.yml
 one needs a vault password. It is distributed separately.
@@ -105,7 +105,7 @@ To communicate with the other two parts run
 
     $ ssh -F ssh.{{gitlab_name}}.cfg gitlab-runner / gitlab-backup
 
-### Configuring
+## Configuring
 
 Most configuration is in group\_vars/all/vars.yml or the vault.yml that was
 already covered.
@@ -130,7 +130,54 @@ certificates manually before summer holidays 2017.
 The playbook for letsencrypt is included but disabled in case there is time to
 work on it.
 
-### Recovering backups
+### Runner config
+
+Multiple virtual machines can be created to act as runners for GitLab CI/CD
+pipelines. Their specs are specified in a dict called runner_vms like so:
+
+```
+runner_vms:
+  centos-dedicated:
+    image: "CentOS-7.0"
+    flavor: "io.70GB"
+    env_config:
+      RUNNER_NAME: "centos-dedicated"
+      DOCKER_IMAGE: "centos"
+      REGISTER_LOCKED: "true"
+  ubuntu-dedicated:
+    image: "CentOS-7.0"
+    flavor: "io.70GB"
+    env_config:
+      RUNNER_NAME: "ubuntu-dedicated"
+      DOCKER_IMAGE: "ubuntu"
+      REGISTER_LOCKED: "true"
+  shared:
+    image: "CentOS-7.0"
+    flavor: "io.70GB"
+    env_config:
+      REGISTRATION_TOKEN: "{{ initial_shared_runners_registration_token }}"
+```
+
+Runner configuration consists of setting an image and a flavor for the virtual
+machine and a list of environment variables that configure the runner at
+registration time. A list of these environment variables can be retrieved by
+running "docker exec gitlab-runner gitlab-ci-multi-runner help register" as
+root on a runner machine.
+
+If a registration token is not initially specified for a VM, then it will not
+register as a runner initially. This is useful when you want to precreate
+a dedicated runner whose registration token will only be known once a project is
+created that will use the runner. Once the registration token is known, you can
+use it to register these precreated VMs as runners by adding it into the dict.
+
+In the example above, the "shared" runner gets a special value for
+REGISTRATION_TOKEN. This is an initial token that is configured in GitLab's
+config file and can be used to register shared runners right away.
+
+For runners that should only be usable by a single project you can set
+REGISTER_LOCKED: "true" in the list of environment variables.
+
+## Recovering backups
 
 1) obtain files and copy them to remote machine, e.g.
 

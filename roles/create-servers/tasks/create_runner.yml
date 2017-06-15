@@ -1,12 +1,12 @@
 ---
 - name: Create the gitlab runner
   os_server:
-    name: "{{ gitlab_name }}-runner"
+    name: "{{ gitlab_name }}-runner-{{ item.key }}"
     state: present
-    image: "{{ image_name }}"
+    image: "{{ item.value.image }}"
     key_name: "{{ keypair_name }}"
     timeout: 200
-    flavor: "{{ runner_flavor }}"
+    flavor: "{{ item.value.flavor }}"
     auto_ip: false
     security_groups:
       - "{{ gitlab_name }}-internal-sg"
@@ -14,7 +14,21 @@
 
 - name: add gitlab_runner to inventory
   add_host:
-    name: gitlab-runner
+    name: "gitlab-runner-{{ item.key }}"
     groups: gitlab-runner
     ansible_ssh_port: 22
     ansible_ssh_user: cloud-user
+    env_config: "{{ item.value.env_config|default({}) }}"
+
+- name: add ssh alias to local ssh config
+  blockinfile:
+    dest:  "ssh.{{ gitlab_name }}.cfg"
+    backup: no
+    mode: 0700
+    create: yes
+    marker: "# {mark} ANSIBLE MANAGED BLOCK for host gitlab-runner-{{ item.key }}"
+    block: |
+      Host gitlab-runner-{{ item.key }}
+      HostName {{ gitlab_runner.openstack.private_v4 }}
+      User {{ ansible_user }}
+      ProxyCommand ssh -p {{ gitlab_control_port }} -W %h:%p {{ ansible_user }}@{{ public_ip }}

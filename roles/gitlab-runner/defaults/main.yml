@@ -1,3 +1,14 @@
 gitlab_runner_tag: latest
 
 self_signed_certificate: ""
+
+# You definitely want to change this if you create shared runners
+initial_shared_runners_registration_token: "very-secret"
+
+default_env_config:
+  REGISTER_NON_INTERACTIVE: "true"
+  CI_SERVER_URL: "https://{{ server_fqdn }}/ci"
+  RUNNER_NAME: "ubuntu"
+  RUNNER_EXECUTOR: "docker"
+  DOCKER_IMAGE: "ubuntu"
+  DOCKER_EXTRA_HOSTS: "{{ server_fqdn }}:{{ hostvars['gitlab']['private_v4'] }}"

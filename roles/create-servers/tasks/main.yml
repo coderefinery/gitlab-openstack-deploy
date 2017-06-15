@@ -27,7 +27,8 @@
   when: create_backup
 
 - include: create_runner.yml
-  when: runner_registration_token|default("") != "" and create_runner
+  when: create_runner and runner_vms is defined
+  with_dict: "{{ runner_vms }}"
 
 - name: pause for 10 seconds to let cloud-init work it's magic if backup and runner weren't created
   pause:
@@ -45,9 +46,6 @@
       Host {{ server_fqdn }}
       HostName {{ gitlab_server.openstack.interface_ip }}
       User {{ ansible_user }}
-      ControlMaster auto
-      ControlPath ~/.ssh/ansible-%r@%h:%p
-      ControlPersist 5m
 
 - name: add gitlab
   blockinfile:
@@ -75,17 +73,3 @@
       User {{ ansible_user }}
       ProxyCommand ssh -p {{ gitlab_control_port }} -W %h:%p {{ ansible_user }}@{{ gitlab_server.openstack.interface_ip }}
   when: create_backup
-
-- name: add ssh alias to local ssh config
-  blockinfile:
-    dest:  "ssh.{{ gitlab_name }}.cfg"
-    backup: no
-    mode: 0700
-    create: yes
-    marker: "# {mark} ANSIBLE MANAGED BLOCK for cr-gitlab-runner"
-    block: |
-      Host gitlab-runner
-      HostName {{ gitlab_runner.openstack.private_v4 }}
-      User {{ ansible_user }}
-      ProxyCommand ssh -p {{ gitlab_control_port }} -W %h:%p {{ ansible_user }}@{{ gitlab_server.openstack.interface_ip }}
-  when: create_runner

@@ -66,16 +66,14 @@
   service: name=docker state=started enabled=yes
   become: True
 
-- name: upgrade pip so package installs aren't broken
+- name: upgrade pip so package installs are not broken
   pip:
     name: pip
     state: latest
   become: True
 
-
 - include: mount_volumes.yml
   when: environment_type == "production"
-
 
 - name: create ssl dir
   file:
@@ -84,7 +82,6 @@
     mode: 0644
     setype: svirt_sandbox_file_t
   become: True
-
 
 - name: upload public SSL CSR
   copy:
@@ -114,7 +111,6 @@
     - reload nginx
     - refresh configs
   register: CRT
-
 
 - name: upload gitlab.rb
   template:

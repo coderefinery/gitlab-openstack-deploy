@@ -31,7 +31,6 @@
   become: True
   when: gitlab_challenge|changed
 
-
 - letsencrypt:
     account_key:  /srv/gitlab/config/ssl/{{ server_fqdn }}.key
     csr:  /srv/gitlab/config/ssl/{{ server_fqdn }}.csr
