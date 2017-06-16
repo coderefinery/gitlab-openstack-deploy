@@ -132,7 +132,7 @@ work on it.
 
 ### Runner config
 
-Multiple virtual machines can be created to act as runners for GitLab CI/CD
+Multiple virtual machines can be created to host runners for GitLab CI/CD
 pipelines. Their specs are specified in a dict called runner_vms like so:
 
 ```
@@ -140,35 +140,43 @@ runner_vms:
   centos-dedicated:
     image: "CentOS-7.0"
     flavor: "io.70GB"
-    env_config:
-      RUNNER_NAME: "centos-dedicated"
-      DOCKER_IMAGE: "centos"
-      REGISTER_LOCKED: "true"
+    runner_configs:
+      - RUNNER_NAME: "centos-dedicated"
+        DOCKER_IMAGE: "centos"
+        REGISTER_LOCKED: "true"
+        state: "started"
   ubuntu-dedicated:
     image: "CentOS-7.0"
     flavor: "io.70GB"
-    env_config:
-      RUNNER_NAME: "ubuntu-dedicated"
-      DOCKER_IMAGE: "ubuntu"
-      REGISTER_LOCKED: "true"
+    runner_configs:
+      - RUNNER_NAME: "ubuntu-dedicated"
+        DOCKER_IMAGE: "ubuntu"
+        REGISTER_LOCKED: "true"
+        REGISTRATION_TOKEN: "{{ vaulted_ubuntu_dedicated_reg_token }}"
+        state: "started"
   shared:
     image: "CentOS-7.0"
     flavor: "io.70GB"
-    env_config:
-      REGISTRATION_TOKEN: "{{ initial_shared_runners_registration_token }}"
+    runner_configs:
+      - REGISTRATION_TOKEN: "{{ initial_shared_runners_registration_token }}"
+        state: "started"
+      - RUNNER_NAME: "alpine"
+        DOCKER_IMAGE: "alpine"
+        REGISTRATION_TOKEN: "{{ initial_shared_runners_registration_token }}"
+        state: "started"
 ```
 
 Runner configuration consists of setting an image and a flavor for the virtual
-machine and a list of environment variables that configure the runner at
-registration time. A list of these environment variables can be retrieved by
-running "docker exec gitlab-runner gitlab-ci-multi-runner help register" as
-root on a runner machine.
+machine and a list of environment variable dicts (one per runner) that
+configure runners at registration time. A list of these environment variables
+can be retrieved by running "docker exec gitlab-runner gitlab-ci-multi-runner
+help register" as root on a runner machine.
 
-If a registration token is not initially specified for a VM, then it will not
-register as a runner initially. This is useful when you want to precreate
-a dedicated runner whose registration token will only be known once a project is
-created that will use the runner. Once the registration token is known, you can
-use it to register these precreated VMs as runners by adding it into the dict.
+If a registration token is not initially specified for a runner, then it will
+not register initially. This is useful when you want to precreate a dedicated
+runner whose registration token will only be known once a project is created
+that will use the runner. Once the registration token is known, you can use it
+to register these precreated runners as runners by adding it into the dict.
 
 In the example above, the "shared" runner gets a special value for
 REGISTRATION_TOKEN. This is an initial token that is configured in GitLab's

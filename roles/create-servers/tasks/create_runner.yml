@@ -18,7 +18,7 @@
     groups: gitlab-runner
     ansible_ssh_port: 22
     ansible_ssh_user: cloud-user
-    env_config: "{{ item.value.env_config|default({}) }}"
+    runner_configs: "{{ item.value.runner_configs|default({}) }}"
 
 - name: add ssh alias to local ssh config
   blockinfile:

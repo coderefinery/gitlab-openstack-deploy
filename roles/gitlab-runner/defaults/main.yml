@@ -5,7 +5,7 @@ self_signed_certificate: ""
 # You definitely want to change this if you create shared runners
 initial_shared_runners_registration_token: "very-secret"
 
-default_env_config:
+default_runner_config:
   REGISTER_NON_INTERACTIVE: "true"
   CI_SERVER_URL: "https://{{ server_fqdn }}/ci"
   RUNNER_NAME: "ubuntu"

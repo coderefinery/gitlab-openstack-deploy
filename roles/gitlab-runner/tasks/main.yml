@@ -89,8 +89,5 @@
     state: disabled
   become: True
 
-- set_fact:
-    runner_environment: "{{ default_env_config|combine(env_config) }}"
-
 - include: gitlab_runner.yml
-  when: runner_environment.REGISTRATION_TOKEN is defined and runner_environment.REGISTRATION_TOKEN != ""
+  with_items: "{{ runner_configs }}"

@@ -1,26 +1,50 @@
-- name: pull the image
+- set_fact:
+    runner_config: "{{ default_runner_config|combine(item) }}"
+
+- name: get gitlab-runner-{{ runner_config.RUNNER_NAME }} run status
+  shell: docker ps | grep -w "gitlab-runner-{{ runner_config.RUNNER_NAME }}"
+  register: container_run_status
+  become: True
+  failed_when: false
+  changed_when: false
+
+- name: pull the gitlab-runner image
   docker_image:
     name: "gitlab/gitlab-runner:{{ gitlab_runner_tag }}"
   become: True
 
-- name: start the container
+- name: unregister runner gitlab-runner-{{ runner_config.RUNNER_NAME }}
+  shell: >
+    docker exec gitlab-runner-{{ runner_config.RUNNER_NAME }}
+    gitlab-ci-multi-runner unregister -n {{ runner_config.RUNNER_NAME }}
+  become: True
+  when: runner_config.state == "absent" and container_run_status.rc == 0
+
+- name: >
+    set state for gitlab-runner-{{ runner_config.RUNNER_NAME }}
+    to {{ runner_config.state }}
   docker_container:
-    name: gitlab-runner
+    name: "gitlab-runner-{{ runner_config.RUNNER_NAME }}"
     image: "gitlab/gitlab-runner:{{ gitlab_runner_tag }}"
-    state: started
+    state: "{{ runner_config.state }}"
     restart_policy: always
     volumes:
       - /srv/gitlab-runner/config:/etc/gitlab-runner:Z
       - /var/run/docker.sock:/var/run/docker.sock
-    env: "{{ runner_environment }}"
+    env: "{{ runner_config }}"
     etc_hosts: >
       {
-        "{{ server_fqdn }}": "{{hostvars['gitlab']['private_v4']}}"
+        "{{ server_fqdn }}": "{{ hostvars['gitlab']['private_v4'] }}"
       }
   become: True
   register: runner_start_result
 
-- name: register runner
-  shell: "docker exec gitlab-runner gitlab-ci-multi-runner register"
+- name: register runner gitlab-runner-{{ runner_config.RUNNER_NAME }}
+  shell: >
+    docker exec gitlab-runner-{{ runner_config.RUNNER_NAME }}
+    gitlab-ci-multi-runner register
   become: True
-  when: runner_start_result.changed
+  when: runner_start_result.changed and
+        runner_config.state == "started" and
+        runner_config.REGISTRATION_TOKEN is defined and
+        runner_config.REGISTRATION_TOKEN != ""
