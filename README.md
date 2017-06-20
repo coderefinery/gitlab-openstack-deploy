@@ -158,7 +158,9 @@ runner_vms:
     image: "CentOS-7.0"
     flavor: "io.70GB"
     runner_configs:
-      - REGISTRATION_TOKEN: "{{ initial_shared_runners_registration_token }}"
+      - RUNNER_NAME: "ubuntu-shared"
+        DOCKER_IMAGE: "ubuntu"
+        REGISTRATION_TOKEN: "{{ initial_shared_runners_registration_token }}"
         state: "started"
       - RUNNER_NAME: "alpine"
         DOCKER_IMAGE: "alpine"
@@ -184,6 +186,12 @@ config file and can be used to register shared runners right away.
 
 For runners that should only be usable by a single project you can set
 REGISTER_LOCKED: "true" in the list of environment variables.
+
+The state variable can be any of the [states accepted by the docker
+module](https://docs.ansible.com/ansible/docker_container_module.html). As
+containers are identified by name only it is important that you do change
+RUNNER_NAME without first setting it's state to stopped or absent. If you do,
+you will have a ghost container and have to stop and remove it manually.
 
 ## Recovering backups
 
