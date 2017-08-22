@@ -3,6 +3,7 @@
 # https://gitlab.com/gitlab-org/omnibus-gitlab/blob/master/files/gitlab-config-template/gitlab.rb.template
 #
 external_url 'https://{{ server_name }}'
+registry_external_url 'https://{{ server_name }}:4567'
 
 #### Change the initial default admin password and shared runner registraion
 #tokens.
