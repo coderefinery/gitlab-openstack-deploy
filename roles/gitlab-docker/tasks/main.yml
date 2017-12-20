@@ -29,6 +29,7 @@
     - sysstat
     - iptables-services
     - epel-release
+    - tmpwatch
   become: True
 
 - name: install yum packages from epel

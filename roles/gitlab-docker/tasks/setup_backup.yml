@@ -10,4 +10,10 @@
     special_time: daily
     job: docker exec -t gitlab gitlab-rake gitlab:backup:create
 
-
+- name: add old backup file cleanup to root crontab
+  cron:
+    name: remove old backup files
+    minute: 30
+    hour: 5
+    job: tmpwatch -u 14d /srv/gitlab/data/backups /srv/gitlab/config/backups
+  become: yes
