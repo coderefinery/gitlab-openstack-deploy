@@ -231,3 +231,24 @@ BACKUP=1495065614_2017_05_18
 ```
 
 with the timestamp of the backup. Answer YES to everything.
+
+## Updating
+
+1. Notify on system
+2. Verify that a recent backup exists
+3. Edit gitlab_tag in environments/[your_env]/group_vars/all/vars.yml
+4. Set up environment variables (like ANSIBLE_CONFIG, OpenStack credentials
+   etc.)
+5. Run playbook
+
+If you suspect something fishy about the migrations not having been run, run
+
+```
+$ ssh -F ssh.[your_environment].cfg gitlab
+$ su
+# docker exec -it gitlab bash
+# gitlab-rake db:migrate
+```
+
+Migrations should be run automatically at the startup of the container,
+though.
