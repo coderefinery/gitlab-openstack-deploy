@@ -40,7 +40,12 @@
     group: cloud-user
     mode: 0700
   become: True
-
+- name: install yum packages
+  yum:
+    state: installed
+    name:
+    - tmpwatch
+  become: True
 
 - name: set up private key
   copy:
@@ -81,5 +86,10 @@
     user: cloud-user
   become: True
 
-
-
+- name: add old backup file cleanup to root crontab
+  cron:
+    name: remove old backup files
+    minute: 30
+    hour: 5
+    job: tmpwatch -u 14d /backup/secret/ /backup/data/
+  become: yes
