@@ -91,5 +91,5 @@
     name: remove old backup files
     minute: 30
     hour: 5
-    job: tmpwatch -u 10d /backup/secret/ /backup/data/
+    job: tmpwatch -m 10d /backup/secret/ /backup/data/
   become: yes
