@@ -15,8 +15,8 @@ gitlab_rails['initial_root_password'] = '{{ gitlab_root_password }}'
 gitlab_rails['smtp_enable'] = true
 gitlab_rails['smtp_address'] = 'smtp.sdn.csc.fi'
 
-
 gitlab_rails['gitlab_email_from'] = '{{ gitlab_email_from }}'
+gitlab_rails['gitlab_email_reply_to'] = '{{ gitlab_email_reply_to|default(gitlab_email_from) }}'
 gitlab_rails['gitlab_email_display_name'] = '{{ gitlab_email_display_name }}'
 
 gitlab_rails['initial_shared_runners_registration_token'] = '{{ initial_shared_runners_registration_token }}'
